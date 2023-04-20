@@ -1,6 +1,7 @@
 import requests
 import time
 from parsel import Selector
+from .database import create_news
 
 # https://pt.stackoverflow.com/questions/449990/como-obter-a-primeira-palavra-de-um-texto-em-python
 # https://pt.stackoverflow.com/questions/107841/fun%C3%A7%C3%A3o-equivalente-ao-trim-fun%C3%A7%C3%A3o-para-remover-espa%C3%A7os-extras-no-in%C3%ADcio-e-fim
@@ -59,4 +60,21 @@ def scrape_news(html_content):
 
 # Requisito 5
 def get_tech_news(amount):
-    """Seu código deve vir aqui"""
+    blog_link = "https://blog.betrybe.com"
+    blog_link_list = []
+    content = []
+
+    while len(blog_link_list) < amount:
+        blog_page = fetch(blog_link)
+        new_blog_page = scrape_updates(blog_page)
+        blog_link_list.extend(new_blog_page)
+        blog_link = scrape_next_page_link(blog_page)
+
+    for link in blog_link_list:
+        current_blog_page = fetch(link)
+        if len(content) < amount:
+            content.append(scrape_news(current_blog_page))
+
+    create_news(content)
+
+    return content
